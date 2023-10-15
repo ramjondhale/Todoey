@@ -10,22 +10,14 @@ import UIKit
 class TodoListViewController: UITableViewController {
 
     var todoItems = [
-        "Find Mike",
-        "Buy Eggos",
-        "Destroy Demogorgons"
+        TodoItem(title: "Find Mike"),
+        TodoItem(title: "Buy Eggos"),
+        TodoItem(title: "Destroy Demogorgons")
     ]
-
-    static let userDefaultKey = "TodoListArray"
-
-    let defaults = UserDefaults.standard
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Update local todo list array with data from user defaults
-        if let storedItems = defaults.array(forKey: Self.userDefaultKey) as? [String] {
-            todoItems = storedItems
-        }
     }
 
     // MARK: - TableView DataSource Methods
@@ -36,16 +28,17 @@ class TodoListViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
-        cell.textLabel?.text = todoItems[indexPath.row]
+        let todoItem = todoItems[indexPath.row]
+        cell.textLabel?.text = todoItem.title
+        cell.accessoryType = todoItem.done ? .checkmark : .none
         return cell
     }
 
     // MARK: - TableView Delegate Methods
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let cell = tableView.cellForRow(at: indexPath)
-        cell?.accessoryType = cell?.accessoryType == UITableViewCell.AccessoryType.none ? .checkmark : .none
-
+        todoItems[indexPath.row].done.toggle()
+        tableView.reloadData()
         tableView.deselectRow(at: indexPath, animated: true)
     }
 
@@ -62,12 +55,8 @@ class TodoListViewController: UITableViewController {
         }
 
         let addAction = UIAlertAction(title: "Add Item", style: .default) { action in
-            if let todoItem = todoTextField.text {
-                self.todoItems.append(todoItem)
-
-                // Store new todo list in the user defaults
-                self.defaults.set(self.todoItems, forKey: Self.userDefaultKey)
-
+            if let todoTitle = todoTextField.text {
+                self.todoItems.append(TodoItem(title: todoTitle))
                 self.tableView.reloadData()
             }
         }
@@ -75,6 +64,4 @@ class TodoListViewController: UITableViewController {
 
         present(alertController, animated: true)
     }
-
 }
-
