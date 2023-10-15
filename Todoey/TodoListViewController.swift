@@ -15,9 +15,17 @@ class TodoListViewController: UITableViewController {
         "Destroy Demogorgons"
     ]
 
+    static let userDefaultKey = "TodoListArray"
+
+    let defaults = UserDefaults.standard
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+
+        // Update local todo list array with data from user defaults
+        if let storedItems = defaults.array(forKey: Self.userDefaultKey) as? [String] {
+            todoItems = storedItems
+        }
     }
 
     // MARK: - TableView DataSource Methods
@@ -56,6 +64,10 @@ class TodoListViewController: UITableViewController {
         let addAction = UIAlertAction(title: "Add Item", style: .default) { action in
             if let todoItem = todoTextField.text {
                 self.todoItems.append(todoItem)
+
+                // Store new todo list in the user defaults
+                self.defaults.set(self.todoItems, forKey: Self.userDefaultKey)
+
                 self.tableView.reloadData()
             }
         }
